@@ -2,7 +2,7 @@ require 'test_helper'
 
 class CcmathTest < Minitest::Test
   def test_main
-    assert_equal 1, CCMath.cos(1)
+    assert_equal 0.5403023058681398, CCMath.cos(1)
   end
   # def test_sqrt
   #   assert_equal CMath.sqrt(1i), CMath.sqrt(1.0i), '[ruby-core:31672]'
