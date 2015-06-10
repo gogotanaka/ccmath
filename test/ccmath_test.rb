@@ -4,6 +4,7 @@ class CcmathTest < Minitest::Test
   def test_main
     assert_equal 0.5403023058681398, CCMath.cos(1)
     assert_in_delta 2.0327230070196656-3.0518977991517997i, CCMath.cos(1+2i)
+    assert_in_delta 3.165778513216168+1.959601041421606i  , CCMath.sin(1+2i)
   end
   # def test_sqrt
   #   assert_equal CMath.sqrt(1i), CMath.sqrt(1.0i), '[ruby-core:31672]'
@@ -27,7 +28,7 @@ class CcmathTest < Minitest::Test
   #
   # def test_functions
   #   assert_in_delta -1.1312043837568135+2.4717266720048188i , CMath.exp(1+2i)
-  #   assert_in_delta 3.165778513216168+1.959601041421606i    , CMath.sin(1+2i)
+
   #   assert_in_delta 2.0327230070196656-3.0518977991517997i  , CMath.cos(1+2i)
   #   assert_in_delta 0.033812826079896774+1.0147936161466338i, CMath.tan(1+2i)
   #   assert_in_delta -0.4890562590412937+1.4031192506220405i , CMath.sinh(1+2i)
