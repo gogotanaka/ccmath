@@ -22,3 +22,21 @@ end
 
 
 task default: :compile_and_test
+
+
+#  Benchmark
+#-----------------------------------------------
+desc "Compare with stb-CMath"
+task :benchmark do
+  require "benchmark/ips"
+  require 'cmath'
+  require 'ccmath'
+
+  Benchmark.ips do |x|
+    x.report('CMath')  { CMath.cos(1+1i) }
+    x.report('CCMath') { CCMath.cos(1+1i) }
+
+    x.compare!
+  end
+end
+task bm: :benchmark

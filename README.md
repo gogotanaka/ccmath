@@ -1,12 +1,31 @@
-# Ccmath
+# Implement CMath(Ruby-stl) with C.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ccmath`. To experiment with that code, run `bin/console` for an interactive prompt.
+Ruby has two official libraries related with mathematics.
 
-TODO: Delete this and the text above, and describe your gem
+* **Math** ...Implemented with C. Only for Real number.
+* **CMath**...Implemented with Ruby. Accept Complex number.
+
+And now,
+
+* **CCMath**...Implemented with C. Accept Complex number.
+
+
+```
+Calculating -------------------------------------
+               CMath    30.828k i/100ms
+              CCMath    46.279k i/100ms
+-------------------------------------------------
+               CMath    443.352k (± 5.5%) i/s -      2.220M
+              CCMath    803.920k (± 4.1%) i/s -      4.026M
+
+Comparison:
+              CCMath:   803920.3 i/s
+               CMath:   443351.8 i/s - 1.81x slower
+
+```
 
 ## Installation
 
-Add this line to your application's Gemfile:
 
 ```ruby
 gem 'ccmath'
@@ -19,10 +38,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install ccmath
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
@@ -38,4 +53,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
