@@ -45,7 +45,6 @@ inline static VALUE DBL2COMP(double real, double imag) {
   double z_real = Get_Double(dat->real); \
   double z_imag = Get_Double(dat->imag);
 
-
 static VALUE ccmath_cos(VALUE obj, VALUE z) {
   if (f_real_p(z)) return DBL2NUM(cos(Get_Double(z)));
   {
@@ -60,7 +59,34 @@ static VALUE ccmath_sin(VALUE obj, VALUE z) {
   {
     EXTRACT_DBL(z);
     return DBL2COMP(sin(z_real) * cosh(z_imag),
-                    + cos(z_real) * sinh(z_imag));
+                    cos(z_real) * sinh(z_imag));
+  }
+}
+
+static VALUE ccmath_cosh(VALUE obj, VALUE z) {
+  if (f_real_p(z)) return DBL2NUM(cosh(Get_Double(z)));
+  {
+    EXTRACT_DBL(z);
+    return DBL2COMP(cosh(z_real) * cos(z_imag),
+                    sinh(z_real) * sin(z_imag));
+  }
+}
+
+static VALUE ccmath_sinh(VALUE obj, VALUE z) {
+  if (f_real_p(z)) return DBL2NUM(sinh(Get_Double(z)));
+  {
+    EXTRACT_DBL(z);
+    return DBL2COMP(sinh(z_real) * cos(z_imag),
+                    cosh(z_real) * sin(z_imag));
+  }
+}
+
+static VALUE ccmath_exp(VALUE obj, VALUE z) {
+  if (f_real_p(z)) return DBL2NUM(exp(Get_Double(z)));
+  {
+    EXTRACT_DBL(z);
+    double ere = exp(z_real);
+    return DBL2COMP(ere * cos(z_imag), ere * sin(z_imag));
   }
 }
 
@@ -70,5 +96,9 @@ void Init_ccmath(void) {
   rb_cComplex = rb_define_class("Complex", rb_cNumeric);
   rb_define_module_function(rb_mCcmath, "cos", ccmath_cos, 1);
   rb_define_module_function(rb_mCcmath, "sin", ccmath_sin, 1);
+  rb_define_module_function(rb_mCcmath, "cosh", ccmath_cosh, 1);
+  rb_define_module_function(rb_mCcmath, "sinh", ccmath_sinh, 1);
+  rb_define_module_function(rb_mCcmath, "exp", ccmath_exp, 1);
+
   // rb_define_module_function(rb_mCcmath, "sin", ccmath_sin, 1);
 }
