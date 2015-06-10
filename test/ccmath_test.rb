@@ -7,6 +7,8 @@ class CcmathTest < Minitest::Test
     assert_in_delta 2.0327230070196656-3.0518977991517997i  , CCMath.cos(1+2i)
     assert_in_delta -0.4890562590412937+1.4031192506220405i , CCMath.sinh(1+2i)
     assert_in_delta -0.64214812471552+1.0686074213827783i   , CCMath.cosh(1+2i)
+    assert_in_delta 0.033812826079896774+1.0147936161466338i, CCMath.tan(1+2i)
+    assert_in_delta 1.16673625724092-0.2434582011857252i    , CCMath.tanh(1+2i)
     assert_in_delta -1.1312043837568135+2.4717266720048188i , CCMath.exp(1+2i)
     assert_in_delta -1                                      , CCMath.exp(Math::PI.i)
   end
@@ -34,10 +36,7 @@ class CcmathTest < Minitest::Test
 
 
   #   assert_in_delta 2.0327230070196656-3.0518977991517997i  , CMath.cos(1+2i)
-  #   assert_in_delta 0.033812826079896774+1.0147936161466338i, CMath.tan(1+2i)
 
-  #
-  #assert_in_delta 1.16673625724092-0.2434582011857252i    , CCMath.tanh(1+2i)
 
   #   assert_in_delta 1.1609640474436813+1.5972779646881088i  , CMath.log2(1+2i)
   #   assert_in_delta 0.3494850021680094+0.480828578784234i   , CMath.log10(1+2i)

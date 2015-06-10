@@ -63,6 +63,13 @@ static VALUE ccmath_sin(VALUE obj, VALUE z) {
   }
 }
 
+static VALUE ccmath_tan(VALUE obj, VALUE z) {
+  if (f_real_p(z)) return DBL2NUM(tan(Get_Double(z)));
+  {
+    return rb_funcall(ccmath_sin(obj, z), '/', 1, ccmath_cos(obj, z));
+  }
+}
+
 static VALUE ccmath_cosh(VALUE obj, VALUE z) {
   if (f_real_p(z)) return DBL2NUM(cosh(Get_Double(z)));
   {
@@ -81,6 +88,13 @@ static VALUE ccmath_sinh(VALUE obj, VALUE z) {
   }
 }
 
+static VALUE ccmath_tanh(VALUE obj, VALUE z) {
+  if (f_real_p(z)) return DBL2NUM(tan(Get_Double(z)));
+  {
+    return rb_funcall(ccmath_sinh(obj, z), '/', 1, ccmath_cosh(obj, z));
+  }
+}
+
 static VALUE ccmath_exp(VALUE obj, VALUE z) {
   if (f_real_p(z)) return DBL2NUM(exp(Get_Double(z)));
   {
@@ -96,8 +110,10 @@ void Init_ccmath(void) {
   rb_cComplex = rb_define_class("Complex", rb_cNumeric);
   rb_define_module_function(rb_mCcmath, "cos", ccmath_cos, 1);
   rb_define_module_function(rb_mCcmath, "sin", ccmath_sin, 1);
+  rb_define_module_function(rb_mCcmath, "tan", ccmath_tan, 1);
   rb_define_module_function(rb_mCcmath, "cosh", ccmath_cosh, 1);
   rb_define_module_function(rb_mCcmath, "sinh", ccmath_sinh, 1);
+  rb_define_module_function(rb_mCcmath, "tanh", ccmath_tanh, 1);
   rb_define_module_function(rb_mCcmath, "exp", ccmath_exp, 1);
 
   // rb_define_module_function(rb_mCcmath, "sin", ccmath_sin, 1);
