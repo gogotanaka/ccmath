@@ -12,15 +12,15 @@ And now,
 
 ```
 Calculating -------------------------------------
-               CMath    30.828k i/100ms
-              CCMath    46.279k i/100ms
+               CMath    31.262k i/100ms
+              CCMath    53.484k i/100ms
 -------------------------------------------------
-               CMath    443.352k (± 5.5%) i/s -      2.220M
-              CCMath    803.920k (± 4.1%) i/s -      4.026M
+               CMath    437.150k (± 7.1%) i/s -      2.188M
+              CCMath      1.044M (±28.3%) i/s -      4.600M
 
 Comparison:
-              CCMath:   803920.3 i/s
-               CMath:   443351.8 i/s - 1.81x slower
+              CCMath:  1044410.2 i/s
+               CMath:   437150.3 i/s - 2.39x slower
 
 ```
 

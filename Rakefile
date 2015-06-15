@@ -38,5 +38,13 @@ task :benchmark do
 
     x.compare!
   end
+
+  Benchmark.ips do |x|
+    x.report('Math')  { CMath.cos(1) }
+    x.report('CMath')  { CMath.cos(1) }
+    x.report('CCMath') { CCMath.cos(1) }
+
+    x.compare!
+  end
 end
 task bm: :benchmark
