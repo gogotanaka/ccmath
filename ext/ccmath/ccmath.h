@@ -21,6 +21,16 @@
 
 #define LARGE_DBL (DBL_MAX/4.)
 
+struct RComplex {
+    struct RBasic basic;
+    const VALUE real;
+    const VALUE imag;
+};
+
+#define RCOMPLEX(obj) (R_CAST(RComplex)(obj))
+#define RCOMPLEX_SET_REAL(cmp, r) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->real,(r))
+#define RCOMPLEX_SET_IMAG(cmp, i) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->imag,(i))
+
 static inline double
 m_atan2(double y, double x)
 {

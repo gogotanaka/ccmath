@@ -46,16 +46,6 @@ inline static VALUE f_real_p(VALUE x)
     return rb_funcall(x, id_real_p, 0);
 }
 
-struct RComplex {
-    struct RBasic basic;
-    const VALUE real;
-    const VALUE imag;
-};
-
-#define RCOMPLEX(obj) (R_CAST(RComplex)(obj))
-#define RCOMPLEX_SET_REAL(cmp, r) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->real,(r))
-#define RCOMPLEX_SET_IMAG(cmp, i) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->imag,(i))
-
 inline static VALUE DBL2COMP(double real, double imag)
 {
     NEWOBJ_OF(obj, struct RComplex, rb_cComplex,
@@ -67,17 +57,17 @@ inline static VALUE DBL2COMP(double real, double imag)
     return (VALUE)obj;
 }
 
-#define EXTRACT_DBL(z)                     \
-    struct RComplex* dat_##z;                  \
-    dat_##z = ((struct RComplex*)(z));         \
-    double z##_real = NUM2DBL_F(dat_##z->real);  \
+#define EXTRACT_DBL(z)                          \
+    struct RComplex* dat_##z;                   \
+    dat_##z = ((struct RComplex*)(z));          \
+    double z##_real = NUM2DBL_F(dat_##z->real); \
     double z##_imag = NUM2DBL_F(dat_##z->imag);
-
 
 #define domain_error(msg) \
     rb_raise(rb_eMathDomainError, "Numerical argument is out of domain - " #msg)
 
-static VALUE ccmath_sqrt(VALUE obj, VALUE z)
+static VALUE
+ccmath_sqrt(VALUE obj, VALUE z)
 {
     if (f_real_p(z)) {
         double dz = NUM2DBL_F(z);
@@ -91,11 +81,12 @@ static VALUE ccmath_sqrt(VALUE obj, VALUE z)
     else {
         EXTRACT_DBL(z)
         double s = sqrt((hypot(z_real, z_imag) + z_real) / 2.0);
-        return DBL2COMP(s, z_imag/(2 * s));
+        return DBL2COMP(s, z_imag / (2 * s));
     }
 }
 
-static VALUE ccmath_cos(VALUE obj, VALUE z)
+static VALUE
+ccmath_cos(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(cos(NUM2DBL_F(z)));
@@ -104,7 +95,8 @@ static VALUE ccmath_cos(VALUE obj, VALUE z)
     return DBL2COMP(cos(z_real) * cosh(z_imag), -sin(z_real) * sinh(z_imag));
 }
 
-static VALUE ccmath_sin(VALUE obj, VALUE z)
+static VALUE
+ccmath_sin(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(sin(NUM2DBL_F(z)));
@@ -113,7 +105,8 @@ static VALUE ccmath_sin(VALUE obj, VALUE z)
     return DBL2COMP(sin(z_real) * cosh(z_imag), cos(z_real) * sinh(z_imag));
 }
 
-static VALUE ccmath_tan(VALUE obj, VALUE z)
+static VALUE
+ccmath_tan(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(tan(NUM2DBL_F(z)));
@@ -121,7 +114,8 @@ static VALUE ccmath_tan(VALUE obj, VALUE z)
     return rb_funcall(ccmath_sin(obj, z), '/', 1, ccmath_cos(obj, z));
 }
 
-static VALUE ccmath_cosh(VALUE obj, VALUE z)
+static VALUE
+ccmath_cosh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(cosh(NUM2DBL_F(z)));
@@ -130,7 +124,8 @@ static VALUE ccmath_cosh(VALUE obj, VALUE z)
     return DBL2COMP(cosh(z_real) * cos(z_imag), sinh(z_real) * sin(z_imag));
 }
 
-static VALUE ccmath_sinh(VALUE obj, VALUE z)
+static VALUE
+ccmath_sinh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(sinh(NUM2DBL_F(z)));
@@ -139,7 +134,8 @@ static VALUE ccmath_sinh(VALUE obj, VALUE z)
     return DBL2COMP(sinh(z_real) * cos(z_imag), cosh(z_real) * sin(z_imag));
 }
 
-static VALUE ccmath_tanh(VALUE obj, VALUE z)
+static VALUE
+ccmath_tanh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(tan(NUM2DBL_F(z)));
@@ -147,7 +143,8 @@ static VALUE ccmath_tanh(VALUE obj, VALUE z)
     return rb_funcall(ccmath_sinh(obj, z), '/', 1, ccmath_cosh(obj, z));
 }
 
-static VALUE ccmath_exp(VALUE obj, VALUE z)
+static VALUE
+ccmath_exp(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(exp(NUM2DBL_F(z)));
@@ -157,7 +154,8 @@ static VALUE ccmath_exp(VALUE obj, VALUE z)
     return DBL2COMP(ere * cos(z_imag), ere * sin(z_imag));
 }
 
-static double internal_log(VALUE x)
+static double
+internal_log(VALUE x)
 {
     double d;
     size_t numbits;
@@ -181,7 +179,8 @@ static double internal_log(VALUE x)
     return log(d) + numbits * log(2); /* log(d * 2 ** numbits) */
 }
 
-static VALUE ccmath_log(int argc, const VALUE* argv, VALUE obj)
+static VALUE
+ccmath_log(int argc, const VALUE* argv, VALUE obj)
 {
     VALUE z, base;
     double d;
@@ -202,24 +201,26 @@ static VALUE ccmath_log(int argc, const VALUE* argv, VALUE obj)
     }
 }
 
-static VALUE ccmath_asinh(VALUE obj, VALUE z)
+static VALUE
+ccmath_asinh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(asinh(NUM2DBL_F(z)));
 
     EXTRACT_DBL(z);
-    VALUE s1 = DBL2COMP(1.0+z_imag, -z_real);
-    VALUE s2 = DBL2COMP(1.0-z_imag, z_real);
+    VALUE s1 = DBL2COMP(1.0 + z_imag, -z_real);
+    VALUE s2 = DBL2COMP(1.0 - z_imag, z_real);
 
     s1 = ccmath_sqrt(obj, s1);
     s2 = ccmath_sqrt(obj, s2);
     EXTRACT_DBL(s1);
     EXTRACT_DBL(s2);
 
-    return DBL2COMP(asinh(s1_real*s2_imag-s2_real*s1_imag), atan2(z_imag, s1_real*s2_real-s1_imag*s2_imag));
+    return DBL2COMP(asinh(s1_real * s2_imag - s2_real * s1_imag), atan2(z_imag, s1_real * s2_real - s1_imag * s2_imag));
 }
 
-static VALUE ccmath_asin(VALUE obj, VALUE z)
+static VALUE
+ccmath_asin(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
         return DBL2NUM(asin(NUM2DBL_F(z)));
@@ -230,43 +231,44 @@ static VALUE ccmath_asin(VALUE obj, VALUE z)
     return DBL2COMP(s_imag, -s_real);
 }
 
-
-static VALUE ccmath_acosh(VALUE obj, VALUE z)
+static VALUE
+ccmath_acosh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
-        return DBL2NUM(acosh(NUM2DBL_F(z)));;
+        return DBL2NUM(acosh(NUM2DBL_F(z)));
 
     EXTRACT_DBL(z);
-    VALUE s1 = DBL2COMP(z_real-1.0, z_imag);
-    VALUE s2 = DBL2COMP(z_real+1.0, z_imag);
+    VALUE s1 = DBL2COMP(z_real - 1.0, z_imag);
+    VALUE s2 = DBL2COMP(z_real + 1.0, z_imag);
 
     s1 = ccmath_sqrt(obj, s1);
     s2 = ccmath_sqrt(obj, s2);
     EXTRACT_DBL(s1);
     EXTRACT_DBL(s2);
 
-    return DBL2COMP(asinh(s1_real*s2_real+s1_imag*s2_imag), 2.0*atan2(s1_imag, s2_real));
+    return DBL2COMP(asinh(s1_real * s2_real + s1_imag * s2_imag), 2.0 * atan2(s1_imag, s2_real));
 }
 
-static VALUE ccmath_acos(VALUE obj, VALUE z)
+static VALUE
+ccmath_acos(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
-        return DBL2NUM(acos(NUM2DBL_F(z)));;
+        return DBL2NUM(acos(NUM2DBL_F(z)));
 
-    return rb_funcall(DBL2NUM(M_PI/2.0), '-', 1, ccmath_asin(obj, z));
+    return rb_funcall(DBL2NUM(M_PI / 2.0), '-', 1, ccmath_asin(obj, z));
 }
 
 static VALUE
 ccmath_atanh(VALUE obj, VALUE z)
 {
     if (f_real_p(z))
-        return DBL2NUM(atanh(NUM2DBL_F(z)));;
+        return DBL2NUM(atanh(NUM2DBL_F(z)));
 
     EXTRACT_DBL(z);
     double sq_imag = z_imag * z_imag;
 
-    return DBL2COMP(m_log1p(4.0*z_real/((1.0-z_real)*(1.0-z_real) + sq_imag))/4.0,
-                    -m_atan2(-2.0*z_imag, (1.0-z_real)*(1.0+z_real) - sq_imag)/2.0);
+    return DBL2COMP(m_log1p(4.0 * z_real / ((1.0 - z_real) * (1.0 - z_real) + sq_imag)) / 4.0,
+                    -m_atan2(-2.0 * z_imag, (1.0 - z_real) * (1.0 + z_real) - sq_imag) / 2.0);
 }
 
 static VALUE
