@@ -4,28 +4,8 @@ VALUE rb_mCcmath;
 
 static ID id_real_p;
 
-#define LARGE_DBL (DBL_MAX/4.)
-
-// enum special_types {
-//     ST_NINF,            /* 0, negative infinity */
-//     ST_NEG,             /* 1, negative finite number (nonzero) */
-//     ST_NZERO,           /* 2, -0. */
-//     ST_PZERO,           /* 3, +0. */
-//     ST_POS,             /* 4, positive finite number (nonzero) */
-//     ST_PINF,            /* 5, positive infinity */
-//     ST_NAN              /* 6, Not a Number */
-// };
-
 #define RB_BIGNUM_TYPE_P(x) RB_TYPE_P((x), T_BIGNUM)
 #define BIGNUM_POSITIVE_P(b) (FIX2LONG(rb_big_cmp((b), INT2FIX(0))) >= 0)
-
-#ifndef DBL_MANT_DIG
-#define DBL_MAX_EXP 1024
-#endif
-
-#ifndef DBL_MANT_DIG
-#define DBL_MANT_DIG 53
-#endif
 
 #define fix2dbl_without_to_f(x) (double) FIX2LONG(x)
 #define big2dbl_without_to_f(x) rb_big2dbl(x)
@@ -218,7 +198,7 @@ static VALUE ccmath_log(int argc, const VALUE* argv, VALUE obj)
     else {
         EXTRACT_DBL(z);
         float r = hypot(z_real, z_imag);
-        return DBL2COMP(log(r), atan2_optimized(z_imag, z_real));
+        return DBL2COMP(log(r), m_atan2(z_imag, z_real));
     }
 }
 
@@ -276,18 +256,30 @@ static VALUE ccmath_acos(VALUE obj, VALUE z)
     return rb_funcall(DBL2NUM(M_PI/2.0), '-', 1, ccmath_asin(obj, z));
 }
 
-// static VALUE ccmath_atanh(VALUE obj, VALUE z)
-//  log((1.0 + z) / (1.0 - z)) / 2.0
-// {
-//     if (f_real_p(z))
-//         return DBL2NUM(atanh(NUM2DBL_F(z)));;
-//
-//     EXTRACT_DBL(z);
-//     double abs_imag = fabs(z_imag)
-//     m_log1p(4.0*z_real/((1.0-z_real)*(1.0-z_real) + abs_imag*abs_imag))/4.0
-//
-//     return rb_funcall(DBL2NUM(M_PI/2.0), '-', 1, ccmath_asin(obj, z));
-// }
+static VALUE
+ccmath_atanh(VALUE obj, VALUE z)
+{
+    if (f_real_p(z))
+        return DBL2NUM(atanh(NUM2DBL_F(z)));;
+
+    EXTRACT_DBL(z);
+    double sq_imag = z_imag * z_imag;
+
+    return DBL2COMP(m_log1p(4.0*z_real/((1.0-z_real)*(1.0-z_real) + sq_imag))/4.0,
+                    -m_atan2(-2.0*z_imag, (1.0-z_real)*(1.0+z_real) - sq_imag)/2.0);
+}
+
+static VALUE
+ccmath_atan(VALUE obj, VALUE z)
+{
+    if (f_real_p(z))
+        return DBL2NUM(atan(NUM2DBL_F(z)));
+
+    EXTRACT_DBL(z);
+    VALUE s = ccmath_atanh(obj, DBL2COMP(-z_imag, z_real));
+    EXTRACT_DBL(s);
+    return DBL2COMP(s_imag, -s_real);
+}
 
 void Init_ccmath(void)
 {
@@ -307,4 +299,6 @@ void Init_ccmath(void)
     rb_define_module_function(rb_mCcmath, "asin", ccmath_asin, 1);
     rb_define_module_function(rb_mCcmath, "acosh", ccmath_acosh, 1);
     rb_define_module_function(rb_mCcmath, "acos", ccmath_acos, 1);
+    rb_define_module_function(rb_mCcmath, "atanh", ccmath_atanh, 1);
+    rb_define_module_function(rb_mCcmath, "atan", ccmath_atan, 1);
 }

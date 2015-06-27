@@ -40,6 +40,8 @@ class CcmathTest < Minitest::Test
     assert_in_delta 0.4270785863924755+1.5285709194809978i  , CCMath.asin(1+2i)
     assert_in_delta 1.528570919480998+1.1437177404024204i   , CCMath.acosh(1+2i)
     assert_in_delta 1.1437177404024204-1.528570919480998i   , CCMath.acos(1+2i)
+    assert_in_delta 0.17328679513998635+1.1780972450961724i , CCMath.atanh(1+2i)
+    assert_in_delta 1.3389725222944935+0.4023594781085251i  , CCMath.atan(1+2i)
 
 
   #   assert_in_delta 2.0327230070196656-3.0518977991517997i  , CCMath.cos(1+2i)
@@ -47,9 +49,8 @@ class CcmathTest < Minitest::Test
 
   #   assert_in_delta 1.1609640474436813+1.5972779646881088i  , CCMath.log2(1+2i)
   #   assert_in_delta 0.3494850021680094+0.480828578784234i   , CCMath.log10(1+2i)
-  #   assert_in_delta 1.3389725222944935+0.4023594781085251i  , CCMath.atan(1+2i)
+  #
   #   assert_in_delta 1.3389725222944935+0.4023594781085251i  , CCMath.atan2(1+2i,1)
-  #   assert_in_delta 0.17328679513998635+1.1780972450961724i , CCMath.atanh(1+2i)
   end
   #
   # def test_cbrt_returns_principal_value_of_cube_root
