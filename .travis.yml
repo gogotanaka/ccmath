@@ -1,4 +1,15 @@
 language: ruby
+sudo: false
+cache:
+- bundler
+
+bundler:
 rvm:
-  - 2.2.2
+  - 2.2
+  - 2.1
+  - 2.0
+  - ruby-head
+  # - jruby-head
 before_install: gem install bundler -v 1.10.3
+notifications:
+  email: false
