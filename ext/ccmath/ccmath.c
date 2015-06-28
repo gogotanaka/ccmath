@@ -14,7 +14,8 @@ static ID id_real_p;
 #define rat2dbl_without_to_f(x) \
     (int2dbl_without_to_f(rb_rational_num(x)) / int2dbl_without_to_f(rb_rational_den(x)))
 
-static inline double num2dbl_without_to_f(VALUE num)
+static inline double
+num2dbl_without_to_f(VALUE num)
 {
     if (SPECIAL_CONST_P(num)) {
         if (FIXNUM_P(num)) {
@@ -41,12 +42,14 @@ static inline double num2dbl_without_to_f(VALUE num)
 
 #define NUM2DBL_F(x) num2dbl_without_to_f(x)
 
-inline static VALUE f_real_p(VALUE x)
+inline static VALUE
+f_real_p(VALUE x)
 {
     return rb_funcall(x, id_real_p, 0);
 }
 
-inline static VALUE DBL2COMP(double real, double imag)
+inline static VALUE
+DBL2COMP(double real, double imag)
 {
     NEWOBJ_OF(obj, struct RComplex, rb_cComplex,
         T_COMPLEX | (RGENGC_WB_PROTECTED_COMPLEX ? FL_WB_PROTECTED : 0));
