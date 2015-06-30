@@ -2,5 +2,21 @@ require "ccmath/version"
 require "ccmath/ccmath"
 
 module CCMath
-  PI = Math::PI
+  class << self
+    %w[
+      atan2
+      cbrt
+      frexp
+      ldexp
+      hypot
+      erf
+      erfc
+      gamma
+      lgamma
+    ].each do |meth|
+      define_method(meth) do |*args, &blk|
+        Math.send(meth, *args, &blk)
+      end
+    end
+  end
 end

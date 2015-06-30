@@ -7,6 +7,14 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#ifndef M_LN2
+#define M_LN2 (0.6931471805599453094) /* log(2) */
+#endif
+
+#ifndef M_LN10
+#define M_LN10 (2.302585092994045684) /* log(10) */
+#endif
+
 #ifndef DBL_MANT_DIG
 #define DBL_MAX_EXP 1024
 #endif

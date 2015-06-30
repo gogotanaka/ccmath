@@ -79,7 +79,7 @@ ccmath_sqrt(VALUE obj, VALUE z)
             return DBL2COMP(0.0, sqrt(fabs(dz)));
         }
         else {
-            return DBL2NUM(sqrt(NUM2DBL_F(dz)));
+            return DBL2NUM(sqrt(dz));
         }
     }
     else {
@@ -87,6 +87,89 @@ ccmath_sqrt(VALUE obj, VALUE z)
         double s = sqrt((hypot(z_real, z_imag) + z_real) / 2.0);
         return DBL2COMP(s, z_imag / (2 * s));
     }
+}
+
+static VALUE
+ccmath_exp(VALUE obj, VALUE z)
+{
+    if (f_real_p(z))
+        return DBL2NUM(exp(NUM2DBL_F(z)));
+
+    EXTRACT_DBL(z);
+    double ere = exp(z_real);
+    return DBL2COMP(ere * cos(z_imag), ere * sin(z_imag));
+}
+
+static double
+internal_log(VALUE x)
+{
+    double d;
+    size_t numbits;
+
+    if (RB_BIGNUM_TYPE_P(x) && BIGNUM_POSITIVE_P(x) && DBL_MAX_EXP <= (numbits = rb_absint_numwords(x, 1, NULL))) {
+        numbits -= DBL_MANT_DIG;
+        x = rb_big_rshift(x, SIZET2NUM(numbits));
+    }
+    else {
+        numbits = 0;
+    }
+
+    d = NUM2DBL_F(x);
+
+    if (d < 0.0)
+        domain_error("log");
+
+    if (d == 0.0)
+        return -INFINITY;
+
+    return log(d) + numbits * log(2); /* log(d * 2 ** numbits) */
+}
+
+static VALUE
+ccmath_log(int argc, const VALUE* argv, VALUE obj)
+{
+    VALUE z, base;
+
+    rb_scan_args(argc, argv, "11", &z, &base);
+
+    if (f_real_p(z)) {
+        double d = internal_log(z);
+        if (argc == 2) {
+            d /= internal_log(base);
+        }
+        return DBL2NUM(d);
+    }
+    else {
+        EXTRACT_DBL(z);
+        float r = hypot(z_real, z_imag);
+        return DBL2COMP(internal_log(DBL2NUM(r)), m_atan2(z_imag, z_real));
+    }
+}
+
+static VALUE
+ccmath_log2(VALUE obj, VALUE z)
+{
+    double d;
+
+    if (f_real_p(z))
+        return DBL2NUM(internal_log(z) / M_LN2);
+
+    EXTRACT_DBL(z);
+    float r = hypot(z_real, z_imag);
+    return DBL2COMP(log(r)/M_LN2, m_atan2(z_imag, z_real)/M_LN2);
+}
+
+static VALUE
+ccmath_log10(VALUE obj, VALUE z)
+{
+    double d;
+
+    if (f_real_p(z))
+        return DBL2NUM(internal_log(z) / M_LN10);
+
+    EXTRACT_DBL(z);
+    float r = hypot(z_real, z_imag);
+    return DBL2COMP(log(r)/M_LN10, m_atan2(z_imag, z_real)/M_LN10);
 }
 
 static VALUE
@@ -145,63 +228,6 @@ ccmath_tanh(VALUE obj, VALUE z)
         return DBL2NUM(tan(NUM2DBL_F(z)));
 
     return rb_funcall(ccmath_sinh(obj, z), '/', 1, ccmath_cosh(obj, z));
-}
-
-static VALUE
-ccmath_exp(VALUE obj, VALUE z)
-{
-    if (f_real_p(z))
-        return DBL2NUM(exp(NUM2DBL_F(z)));
-
-    EXTRACT_DBL(z);
-    double ere = exp(z_real);
-    return DBL2COMP(ere * cos(z_imag), ere * sin(z_imag));
-}
-
-static double
-internal_log(VALUE x)
-{
-    double d;
-    size_t numbits;
-
-    if (RB_BIGNUM_TYPE_P(x) && BIGNUM_POSITIVE_P(x) && DBL_MAX_EXP <= (numbits = rb_absint_numwords(x, 1, NULL))) {
-        numbits -= DBL_MANT_DIG;
-        x = rb_big_rshift(x, SIZET2NUM(numbits));
-    }
-    else {
-        numbits = 0;
-    }
-
-    d = NUM2DBL_F(x);
-    /* check for domain error */
-    if (d < 0.0)
-        domain_error("log");
-    /* check for pole error */
-    if (d == 0.0)
-        return -INFINITY;
-
-    return log(d) + numbits * log(2); /* log(d * 2 ** numbits) */
-}
-
-static VALUE
-ccmath_log(int argc, const VALUE* argv, VALUE obj)
-{
-    VALUE z, base;
-
-    rb_scan_args(argc, argv, "11", &z, &base);
-
-    if (f_real_p(z)) {
-        double d = internal_log(z);
-        if (argc == 2) {
-            d /= internal_log(base);
-        }
-        return DBL2NUM(d);
-    }
-    else {
-        EXTRACT_DBL(z);
-        float r = hypot(z_real, z_imag);
-        return DBL2COMP(log(r), m_atan2(z_imag, z_real));
-    }
 }
 
 static VALUE
@@ -286,35 +312,40 @@ ccmath_atan(VALUE obj, VALUE z)
     return DBL2COMP(s_imag, -s_real);
 }
 
-static VALUE
-ccmath_atan2(VALUE obj, VALUE y, VALUE x)
-{
-    if (f_real_p(y) && f_real_p(x))
-        return DBL2NUM(m_atan2(NUM2DBL_F(y), NUM2DBL_F(x)));
-
-    return DBL2COMP(1, 1);
-}
-
 void Init_ccmath(void)
 {
     id_real_p = rb_intern("real?");
     rb_mCcmath = rb_define_module("CCMath");
-    rb_eMathDomainError = rb_define_class_under(rb_mMath, "DomainError", rb_eStandardError);
+    rb_eMathDomainError = rb_define_class_under(rb_mCcmath, "DomainError", rb_eStandardError);
+    #ifdef M_PI
+        rb_define_const(rb_mCcmath, "PI", DBL2NUM(M_PI));
+    #else
+        rb_define_const(rb_mCcmath, "PI", DBL2NUM(atan(1.0)*4.0));
+    #endif
+
+    #ifdef M_E
+        rb_define_const(rb_mCcmath, "E", DBL2NUM(M_E));
+    #else
+        rb_define_const(rb_mCcmath, "E", DBL2NUM(exp(1.0)));
+    #endif
+
     rb_cComplex = rb_define_class("Complex", rb_cNumeric);
+
+    rb_define_module_function(rb_mCcmath, "sqrt", ccmath_sqrt, 1);
+    rb_define_module_function(rb_mCcmath, "exp", ccmath_exp, 1);
+    rb_define_module_function(rb_mCcmath, "log", ccmath_log, -1);
+    rb_define_module_function(rb_mCcmath, "log2", ccmath_log2, 1);
+    rb_define_module_function(rb_mCcmath, "log10", ccmath_log10, 1);
     rb_define_module_function(rb_mCcmath, "cos", ccmath_cos, 1);
     rb_define_module_function(rb_mCcmath, "sin", ccmath_sin, 1);
     rb_define_module_function(rb_mCcmath, "tan", ccmath_tan, 1);
     rb_define_module_function(rb_mCcmath, "cosh", ccmath_cosh, 1);
     rb_define_module_function(rb_mCcmath, "sinh", ccmath_sinh, 1);
     rb_define_module_function(rb_mCcmath, "tanh", ccmath_tanh, 1);
-    rb_define_module_function(rb_mCcmath, "exp", ccmath_exp, 1);
-    rb_define_module_function(rb_mCcmath, "log", ccmath_log, -1);
-    rb_define_module_function(rb_mCcmath, "sqrt", ccmath_sqrt, 1);
     rb_define_module_function(rb_mCcmath, "asinh", ccmath_asinh, 1);
     rb_define_module_function(rb_mCcmath, "asin", ccmath_asin, 1);
     rb_define_module_function(rb_mCcmath, "acosh", ccmath_acosh, 1);
     rb_define_module_function(rb_mCcmath, "acos", ccmath_acos, 1);
     rb_define_module_function(rb_mCcmath, "atanh", ccmath_atanh, 1);
     rb_define_module_function(rb_mCcmath, "atan", ccmath_atan, 1);
-    rb_define_module_function(rb_mCcmath, "atan2", ccmath_atan2, 2);
 }
