@@ -1,6 +1,42 @@
 require 'test_helper'
 
 class CcmathTest < Minitest::Test
+  def assert_infinity(a, *rest)
+    rest = ["not infinity: #{a.inspect}"] if rest.empty?
+    assert_predicate(a, :infinite?, *rest)
+  end
+
+  def assert_nan(a, *rest)
+    rest = ["not nan: #{a.inspect}"] if rest.empty?
+    assert_predicate(a, :nan?, *rest)
+  end
+
+  def assert_float(a, b)
+    err = [Float::EPSILON * 4, [a.abs, b.abs].max * Float::EPSILON * 256].max
+    assert_in_delta(a, b, err)
+  end
+  alias check assert_float
+
+  def test_atan2
+    check(+0.0, CCMath.atan2(+0.0, +0.0))
+    check(-0.0, CCMath.atan2(-0.0, +0.0))
+    check(+CCMath::PI, CCMath.atan2(+0.0, -0.0))
+    check(-CCMath::PI, CCMath.atan2(-0.0, -0.0))
+
+    inf = Float::INFINITY
+    expected = 3.0 * CCMath::PI / 4.0
+    check(+expected, CCMath.atan2(+inf, -inf))
+    check(-expected, CCMath.atan2(-inf, -inf))
+
+    expected = CCMath::PI / 4.0
+    check(+expected, CCMath.atan2(+inf, +inf))
+    check(-expected, CCMath.atan2(-inf, +inf))
+
+    check(0, CCMath.atan2(0, 1))
+    check(CCMath::PI / 4, CCMath.atan2(1, 1))
+    check(CCMath::PI / 2, CCMath.atan2(1, 0))
+  end
+
   def test_main
     assert_equal 0.5403023058681398, CCMath.cos(1)
     assert_in_delta 3.165778513216168+1.959601041421606i    , CCMath.sin(1+2i)
