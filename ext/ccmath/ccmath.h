@@ -75,4 +75,12 @@ m_log1p(double x)
 #endif /* ifdef HAVE_LOG1P */
 }
 
+#ifndef HAVE_TANH
+double
+tanh(double x)
+{
+    return sinh(x) / cosh(x);
+}
+#endif /* ifdef HAVE_TANH */
+
 #endif /* CCMATH_H */

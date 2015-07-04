@@ -1,6 +1,11 @@
 require 'test_helper'
 
-class CcmathTest < Minitest::Test
+class CcmathRealTest < Minitest::Test
+
+  def setup
+    CCMath.codomain = 'R'
+  end
+
   def assert_infinity(a, *rest)
     rest = ["not infinity: #{a.inspect}"] if rest.empty?
     assert_predicate(a, :infinite?, *rest)
@@ -233,100 +238,43 @@ class CcmathTest < Minitest::Test
   end
 
   def test_gamma
-    sqrt_pi = CCMath.sqrt(CCMath::PI)
-    check(4 * sqrt_pi / 3, CCMath.gamma(-1.5))
-    check(-2 * sqrt_pi, CCMath.gamma(-0.5))
-    check(sqrt_pi, CCMath.gamma(0.5))
-    check(1, CCMath.gamma(1))
-    check(sqrt_pi / 2, CCMath.gamma(1.5))
-    check(1, CCMath.gamma(2))
-    check(3 * sqrt_pi / 4, CCMath.gamma(2.5))
-    check(2, CCMath.gamma(3))
-    check(15 * sqrt_pi / 8, CCMath.gamma(3.5))
-    check(6, CCMath.gamma(4))
-    check(1.1240007277776077e+21, CCMath.gamma(23))
-    check(2.5852016738885062e+22, CCMath.gamma(24))
-
-    # no SEGV [ruby-core:25257]
-    31.upto(65) do |i|
-      i = 1 << i
-      assert_infinity(CCMath.gamma(i), "CCMath.gamma(#{i}) should be INF")
-      assert_infinity(CCMath.gamma(i-1), "CCMath.gamma(#{i-1}) should be INF")
-    end
-
-    assert_raises(CCMath::DomainError) { CCMath.gamma(-Float::INFINITY) }
+    # sqrt_pi = CCMath.sqrt(CCMath::PI)
+    # check(4 * sqrt_pi / 3, CCMath.gamma(-1.5))
+    # check(-2 * sqrt_pi, CCMath.gamma(-0.5))
+    # check(sqrt_pi, CCMath.gamma(0.5))
+    # check(1, CCMath.gamma(1))
+    # check(sqrt_pi / 2, CCMath.gamma(1.5))
+    # check(1, CCMath.gamma(2))
+    # check(3 * sqrt_pi / 4, CCMath.gamma(2.5))
+    # check(2, CCMath.gamma(3))
+    # check(15 * sqrt_pi / 8, CCMath.gamma(3.5))
+    # check(6, CCMath.gamma(4))
+    # check(1.1240007277776077e+21, CCMath.gamma(23))
+    # check(2.5852016738885062e+22, CCMath.gamma(24))
+    #
+    # # no SEGV [ruby-core:25257]
+    # 31.upto(65) do |i|
+    #   i = 1 << i
+    #   assert_infinity(CCMath.gamma(i), "CCMath.gamma(#{i}) should be INF")
+    #   assert_infinity(CCMath.gamma(i-1), "CCMath.gamma(#{i-1}) should be INF")
+    # end
+    #
+    # assert_raises(CCMath::DomainError) { CCMath.gamma(-Float::INFINITY) }
   end
 
   def test_lgamma
-    sqrt_pi = CCMath.sqrt(CCMath::PI)
-    assert_float_and_int([CCMath.log(4 * sqrt_pi / 3),  1], CCMath.lgamma(-1.5))
-    assert_float_and_int([CCMath.log(2 * sqrt_pi),     -1], CCMath.lgamma(-0.5))
-    assert_float_and_int([CCMath.log(sqrt_pi),          1], CCMath.lgamma(0.5))
-    assert_float_and_int([0,                          1], CCMath.lgamma(1))
-    assert_float_and_int([CCMath.log(sqrt_pi / 2),      1], CCMath.lgamma(1.5))
-    assert_float_and_int([0,                          1], CCMath.lgamma(2))
-    assert_float_and_int([CCMath.log(3 * sqrt_pi / 4),  1], CCMath.lgamma(2.5))
-    assert_float_and_int([CCMath.log(2),                1], CCMath.lgamma(3))
-    assert_float_and_int([CCMath.log(15 * sqrt_pi / 8), 1], CCMath.lgamma(3.5))
-    assert_float_and_int([CCMath.log(6),                1], CCMath.lgamma(4))
-
-    assert_raises(CCMath::DomainError) { CCMath.lgamma(-Float::INFINITY) }
+    # sqrt_pi = CCMath.sqrt(CCMath::PI)
+    # assert_float_and_int([CCMath.log(4 * sqrt_pi / 3),  1], CCMath.lgamma(-1.5))
+    # assert_float_and_int([CCMath.log(2 * sqrt_pi),     -1], CCMath.lgamma(-0.5))
+    # assert_float_and_int([CCMath.log(sqrt_pi),          1], CCMath.lgamma(0.5))
+    # assert_float_and_int([0,                          1], CCMath.lgamma(1))
+    # assert_float_and_int([CCMath.log(sqrt_pi / 2),      1], CCMath.lgamma(1.5))
+    # assert_float_and_int([0,                          1], CCMath.lgamma(2))
+    # assert_float_and_int([CCMath.log(3 * sqrt_pi / 4),  1], CCMath.lgamma(2.5))
+    # assert_float_and_int([CCMath.log(2),                1], CCMath.lgamma(3))
+    # assert_float_and_int([CCMath.log(15 * sqrt_pi / 8), 1], CCMath.lgamma(3.5))
+    # assert_float_and_int([CCMath.log(6),                1], CCMath.lgamma(4))
+    #
+    # assert_raises(CCMath::DomainError) { CCMath.lgamma(-Float::INFINITY) }
   end
-
-  def test_main
-    assert_equal 0.5403023058681398, CCMath.cos(1)
-    assert_in_delta 3.165778513216168+1.959601041421606i    , CCMath.sin(1+2i)
-    assert_in_delta 2.0327230070196656-3.0518977991517997i  , CCMath.cos(1+2i)
-    assert_in_delta -0.4890562590412937+1.4031192506220405i , CCMath.sinh(1+2i)
-    assert_in_delta -0.64214812471552+1.0686074213827783i   , CCMath.cosh(1+2i)
-    assert_in_delta 0.033812826079896774+1.0147936161466338i, CCMath.tan(1+2i)
-    assert_in_delta 1.16673625724092-0.2434582011857252i    , CCMath.tanh(1+2i)
-    assert_in_delta -1.1312043837568135+2.4717266720048188i , CCMath.exp(1+2i)
-    assert_in_delta -1                                      , CCMath.exp(Math::PI.i)
-  end
-
-  def test_sqrt
-    assert_equal CCMath.sqrt(1i), CCMath.sqrt(1.0i), '[ruby-core:31672]'
-    assert_in_delta 1.272019649514069+0.7861513777574233i, CCMath.sqrt(1+2i)
-    assert_in_delta 3.0i, CCMath.sqrt(-9)
-    assert_equal Complex(0,2), CCMath.sqrt(-4.0)
-
-
-
-    assert_equal Complex(0,2), CCMath.sqrt(-4)
-    assert_equal Complex(0,2), CCMath.sqrt(Rational(-4))
-    assert_equal Complex(0,3), CCMath.sqrt(-9.0)
-    assert_equal Complex(0,3), CCMath.sqrt(-9)
-    assert_equal Complex(0,3), CCMath.sqrt(Rational(-9))
-  end
-
-  def test_log
-    assert_in_delta 0.8047189562170503+1.1071487177940904i, CCMath.log(1+2i)
-    # assert_in_delta 0.7324867603589635+1.0077701926457874i, CCMath.log(1+2i,3)
-    # assert_in_delta Math::PI*1i                           , CCMath.log(-1)
-    assert_in_delta 3.0, CCMath.log(8, 2)
-    # assert_in_delta 1.092840647090816-0.42078724841586035i, CCMath.log(-8, -2)
-  end
-  #
-  def test_functions
-    assert_in_delta 1.4693517443681852+1.0634400235777521i  , CCMath.asinh(1+2i)
-    assert_in_delta 0.4270785863924755+1.5285709194809978i  , CCMath.asin(1+2i)
-    assert_in_delta 1.528570919480998+1.1437177404024204i   , CCMath.acosh(1+2i)
-    assert_in_delta 1.1437177404024204-1.528570919480998i   , CCMath.acos(1+2i)
-    assert_in_delta 0.17328679513998635+1.1780972450961724i , CCMath.atanh(1+2i)
-    assert_in_delta 1.3389725222944935+0.4023594781085251i  , CCMath.atan(1+2i)
-
-
-  #   assert_in_delta 2.0327230070196656-3.0518977991517997i  , CCMath.cos(1+2i)
-
-
-  #   assert_in_delta 1.1609640474436813+1.5972779646881088i  , CCMath.log2(1+2i)
-  #   assert_in_delta 0.3494850021680094+0.480828578784234i   , CCMath.log10(1+2i)
-  #
-  #   assert_in_delta 1.3389725222944935+0.4023594781085251i  , CCMath.atan2(1+2i,1)
-  end
-  #
-  # def test_cbrt_returns_principal_value_of_cube_root
-  #   assert_equal (-8)**(1.0/3), CCMath.cbrt(-8), '#3676'
-  # end
 end
