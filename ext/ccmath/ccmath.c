@@ -184,7 +184,7 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
                 return DBLS2COMP(log(r) / ln_base, m_atan2(z_imag, z_real) / ln_base);
             }
             else {
-                VALUE ln_base = DBLS2COMP(log(base_real), M_PI);
+                VALUE ln_base = DBLS2COMP(log(fabs(base_real)), M_PI);
                 return rb_funcall(DBLS2COMP(log(r), m_atan2(z_imag, z_real)), '/', 1, ln_base);
             }
         }
