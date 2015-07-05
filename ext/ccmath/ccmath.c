@@ -3,7 +3,7 @@
 VALUE rb_mCCMath;
 VALUE rb_eMathDomainError;
 
-static ID id_real_p, id_codomain;
+static ID id_real_p, id_set;
 
 #define RB_BIGNUM_TYPE_P(x) RB_TYPE_P((x), T_BIGNUM)
 #define BIGNUM_POSITIVE_P(b) (FIX2LONG(rb_big_cmp((b), INT2FIX(0))) >= 0)
@@ -83,10 +83,10 @@ DBLS2COMP(double real, double imag)
     rb_raise(rb_eMathDomainError, "Numerical argument is out of domain - " #msg)
 
 static inline int
-codomain_check(VALUE z) {
+ensure_domain_and_codomain(VALUE z) {
     if (!rb_respond_to(z, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
 
-    char codomain = *(RSTRING_PTR(rb_ivar_get(rb_mCCMath, id_codomain)));
+    char codomain = *(RSTRING_PTR(rb_ivar_get(rb_mCCMath, id_set)));
     if (codomain == 'R') {
         if (!f_real_p(z)) rb_raise(rb_eMathDomainError, "Real Number required");
         return 1;
@@ -102,7 +102,7 @@ codomain_check(VALUE z) {
 static VALUE
 ccmath_sqrt(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = NUM2DBL_F(z);
         if (d < 0.0) domain_error("sqrt");
         if (d == 0.0) return DBL2NUM(0.0);
@@ -128,7 +128,7 @@ ccmath_sqrt(VALUE obj, VALUE z)
 static VALUE
 ccmath_exp(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(exp(NUM2DBL_F(z)));
     }
     else {
@@ -173,7 +173,7 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
     VALUE z, base;
     rb_scan_args(argc, argv, "11", &z, &base);
 
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = internal_log(z);
         if (argc == 2) {
             d /= internal_log(base);
@@ -205,7 +205,7 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
 static VALUE
 ccmath_log2(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d;
         size_t numbits;
 
@@ -226,7 +226,7 @@ ccmath_log2(VALUE obj, VALUE z)
 static VALUE
 ccmath_log10(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d;
         size_t numbits;
 
@@ -247,7 +247,7 @@ ccmath_log10(VALUE obj, VALUE z)
 static VALUE
 ccmath_cos(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(cos(NUM2DBL_F(z)));
     }
     else {
@@ -261,7 +261,7 @@ ccmath_cos(VALUE obj, VALUE z)
 static VALUE
 ccmath_sin(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(sin(NUM2DBL_F(z)));
     }
     else {
@@ -276,7 +276,7 @@ ccmath_sin(VALUE obj, VALUE z)
 static VALUE
 ccmath_tan(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(tan(NUM2DBL_F(z)));
     }
     else {
@@ -287,7 +287,7 @@ ccmath_tan(VALUE obj, VALUE z)
 static VALUE
 ccmath_cosh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(cosh(NUM2DBL_F(z)));
     }
     else {
@@ -301,7 +301,7 @@ ccmath_cosh(VALUE obj, VALUE z)
 static VALUE
 ccmath_sinh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(sinh(NUM2DBL_F(z)));
     }
     else {
@@ -315,7 +315,7 @@ ccmath_sinh(VALUE obj, VALUE z)
 static VALUE
 ccmath_tanh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(tanh(NUM2DBL_F(z)));
     }
     else {
@@ -326,7 +326,7 @@ ccmath_tanh(VALUE obj, VALUE z)
 static VALUE
 ccmath_asinh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(asinh(NUM2DBL_F(z)));
     }
     else {
@@ -349,7 +349,7 @@ ccmath_asinh(VALUE obj, VALUE z)
 static VALUE
 ccmath_asin(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = NUM2DBL_F(z);
         if (d < -1.0 || 1.0 < d) domain_error("asin");
         return DBL2NUM(asin(d));
@@ -368,7 +368,7 @@ ccmath_asin(VALUE obj, VALUE z)
 static VALUE
 ccmath_acosh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = NUM2DBL_F(z);
         if (d < 1.0) domain_error("acosh");
         return DBL2NUM(acosh(d));
@@ -393,7 +393,7 @@ ccmath_acosh(VALUE obj, VALUE z)
 static VALUE
 ccmath_acos(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = NUM2DBL_F(z);
         if (d < -1.0 || 1.0 < d) domain_error("acos");
         return DBL2NUM(acos(d));
@@ -410,7 +410,7 @@ ccmath_acos(VALUE obj, VALUE z)
 static VALUE
 ccmath_atanh(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         double d = NUM2DBL_F(z);
 
         if (d <  -1.0 || +1.0 <  d) domain_error("atanh");
@@ -433,7 +433,7 @@ ccmath_atanh(VALUE obj, VALUE z)
 static VALUE
 ccmath_atan(VALUE obj, VALUE z)
 {
-    if (codomain_check(z)) {
+    if (ensure_domain_and_codomain(z)) {
         return DBL2NUM(atan(NUM2DBL_F(z)));
     }
     else {
@@ -450,14 +450,14 @@ ccmath_atan(VALUE obj, VALUE z)
 static VALUE
 ccmath_define_set(VALUE obj, VALUE str)
 {
-    rb_ivar_set(obj, id_codomain, str);
+    rb_ivar_set(obj, id_set, str);
     return obj;
 }
 
 void Init_ccmath(void)
 {
     id_real_p = rb_intern("real?");
-    id_codomain = rb_intern("codomain");
+    id_set = rb_intern("set");
     rb_mCCMath = rb_define_module("CCMath");
 
     rb_eMathDomainError = rb_define_class_under(rb_mCCMath, "DomainError", rb_eStandardError);
@@ -492,5 +492,5 @@ void Init_ccmath(void)
     rb_define_module_function(rb_mCCMath, "atan", ccmath_atan, 1);
     rb_define_module_function(rb_mCCMath, "set=", ccmath_define_set, 1);
 
-    rb_ivar_set(rb_mCCMath, id_codomain, rb_str_new2("R"));
+    rb_ivar_set(rb_mCCMath, id_set, rb_str_new2("R"));
 }
