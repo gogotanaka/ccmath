@@ -1,4 +1,6 @@
-# Implement CMath(Ruby-stl) with C.
+# CMath implemented with C
+
+[![Build Status](https://travis-ci.org/gogotanaka/ccmath.svg?branch=master)](https://travis-ci.org/gogotanaka/ccmath)
 
 Ruby has two official libraries related with mathematics.
 
@@ -9,6 +11,12 @@ And now,
 
 * **CCMath**...Implemented with C. Accept Complex number.
 
+You can declare codomain.
+
+```ruby
+CCMath.codomain = 'R' # equivalent to Math
+CCMath.codomain = 'C' # equivalent to CMath
+```
 
 ```
 Calculating -------------------------------------
