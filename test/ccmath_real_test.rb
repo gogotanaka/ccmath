@@ -3,7 +3,7 @@ require 'test_helper'
 class CcmathRealTest < Minitest::Test
 
   def setup
-    CCMath.codomain = 'R'
+    CCMath.set = 'R'
   end
 
   def assert_infinity(a, *rest)

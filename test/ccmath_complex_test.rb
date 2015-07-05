@@ -3,7 +3,7 @@ require 'test_helper'
 class CcmathComplexTest < Minitest::Test
 
   def setup
-    CCMath.codomain = 'C'
+    CCMath.set = 'C'
   end
 
   def test_sqrt

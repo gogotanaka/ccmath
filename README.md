@@ -14,9 +14,15 @@ And now,
 You can declare codomain.
 
 ```ruby
-CCMath.codomain = 'R' # equivalent to Math
-CCMath.codomain = 'C' # equivalent to CMath
+CCMath.set = 'R' # equivalent to Math
+CCMath.set = 'C' # equivalent to CMath
 ```
+
+## Demo
+```
+CCMath.cos(1)
+#=> 0.5403023058681398
+
 
 ```
 Calculating -------------------------------------
