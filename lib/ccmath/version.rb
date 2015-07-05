@@ -1,3 +1,3 @@
 module Ccmath
-  VERSION = "0.2.00001"
+  VERSION = "0.2.7"
 end
