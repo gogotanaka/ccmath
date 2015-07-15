@@ -28,12 +28,9 @@ num2dbl_without_to_f(VALUE num)
     }
     else {
         switch (BUILTIN_TYPE(num)) {
-          case T_FLOAT:
-              return RFLOAT_VALUE(num);
-          case T_BIGNUM:
-              return big2dbl_without_to_f(num);
-          case T_RATIONAL:
-              return rat2dbl_without_to_f(num);
+          case T_FLOAT:    return RFLOAT_VALUE(num);
+          case T_BIGNUM:   return big2dbl_without_to_f(num);
+          case T_RATIONAL: return rat2dbl_without_to_f(num);
         }
     }
     return RFLOAT_VALUE(rb_to_float(num));
@@ -82,22 +79,24 @@ DBLS2COMP(double real, double imag)
 #define domain_error(msg) \
     rb_raise(rb_eMathDomainError, "Numerical argument is out of domain - " #msg)
 
-static inline int
-ensure_domain_and_codomain(VALUE z) {
-    if (!rb_respond_to(z, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
+// static inline int
+// ensure_domain_and_codomain(VALUE z) {
+//     if (!rb_respond_to(z, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
+//
+//     char codomain = *(RSTRING_PTR(rb_ivar_get(rb_mCCMath, id_set)));
+//     if (codomain == 'R') {
+//         if (!f_real_p(z)) rb_raise(rb_eMathDomainError, "Real Number required");
+//         return 1;
+//     }
+//     else if (codomain == 'C') {
+//         return 0;
+//     }
+//     else {
+//         domain_error("wow");
+//     }
+// }
 
-    char codomain = *(RSTRING_PTR(rb_ivar_get(rb_mCCMath, id_set)));
-    if (codomain == 'R') {
-        if (!f_real_p(z)) rb_raise(rb_eMathDomainError, "Real Number required");
-        return 1;
-    }
-    else if (codomain == 'C') {
-        return 0;
-    }
-    else {
-        domain_error("wow");
-    }
-}
+# define ensure_domain_and_codomain(z) 0
 
 static VALUE
 ccmath_sqrt(VALUE obj, VALUE z)
