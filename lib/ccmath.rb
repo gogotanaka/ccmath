@@ -11,7 +11,6 @@ module CCMath
       hypot
       erf
       erfc
-      gamma
       lgamma
     ].each do |meth|
       define_method(meth) do |*args, &blk|

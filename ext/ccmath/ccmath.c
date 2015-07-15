@@ -3,7 +3,7 @@
 VALUE rb_mCCMath;
 VALUE rb_eMathDomainError;
 
-static ID id_real_p, id_set;
+static ID id_real_p, id_set, id_power;
 
 #define RB_BIGNUM_TYPE_P(x) RB_TYPE_P((x), T_BIGNUM)
 #define BIGNUM_POSITIVE_P(b) (FIX2LONG(rb_big_cmp((b), INT2FIX(0))) >= 0)
@@ -43,6 +43,19 @@ f_real_p(VALUE x)
 {
     return rb_funcall(x, id_real_p, 0);
 }
+
+#define binop(n,op) \
+inline static VALUE \
+f_##n(VALUE x, VALUE y)\
+{\
+    return rb_funcall(x, (op), 1, y);\
+}
+
+binop(add, '+')
+binop(div, '/')
+binop(sub, '-')
+binop(mul, '*')
+binop(pow, id_power)
 
 inline static VALUE
 DBLS2COMP(double real, double imag)
@@ -192,7 +205,7 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
             }
             else {
                 VALUE ln_base = DBLS2COMP(log(fabs(base_real)), M_PI);
-                return rb_funcall(DBLS2COMP(log(r), m_atan2(z_imag, z_real)), '/', 1, ln_base);
+                return f_div(DBLS2COMP(log(r), m_atan2(z_imag, z_real)), ln_base);
             }
         }
         else {
@@ -279,7 +292,7 @@ ccmath_tan(VALUE obj, VALUE z)
         return DBL2NUM(tan(NUM2DBL_F(z)));
     }
     else {
-        return rb_funcall(ccmath_sin(obj, z), '/', 1, ccmath_cos(obj, z));
+        return f_div(ccmath_sin(obj, z), ccmath_cos(obj, z));
     }
 }
 
@@ -318,7 +331,7 @@ ccmath_tanh(VALUE obj, VALUE z)
         return DBL2NUM(tanh(NUM2DBL_F(z)));
     }
     else {
-        return rb_funcall(ccmath_sinh(obj, z), '/', 1, ccmath_cosh(obj, z));
+        return f_div(ccmath_sinh(obj, z), ccmath_cosh(obj, z));
     }
 }
 
@@ -402,7 +415,7 @@ ccmath_acos(VALUE obj, VALUE z)
 
         if (z_imag == 0.0) return DBLS2COMP(acos(z_real), 0.0);
 
-        return rb_funcall(DBL2NUM(M_PI / 2.0), '-', 1, ccmath_asin(obj, z));
+        return f_sub(DBL2NUM(M_PI / 2.0), ccmath_asin(obj, z));
     }
 }
 
@@ -447,6 +460,44 @@ ccmath_atan(VALUE obj, VALUE z)
 }
 
 static VALUE
+ccmath_gamma(VALUE obj, VALUE z)
+{
+    static const double lanczos_coef[] = {
+        0.99999999999980993,
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7
+    };
+    EXTRACT_DBLS(z);
+    if (z_real < 0.5) {
+        // return pi / (sin(pi*z)*gamma(1-z))
+        return 0;
+    }
+    else {
+        double g = 7.0;
+        z_real -= 1;
+        VALUE x = DBL2NUM(lanczos_coef[0]);
+        double s1, s2;
+        for(int i=1; i<g+2; i++) {
+            s1 = (z_real+i) * (z_real+i) + (z_imag * z_imag);
+            s2 = lanczos_coef[i] / s1;
+            x = f_add(x, DBLS2COMP(s2 * z_real, - s2 * z_imag));
+        }
+        VALUE sqrt_2_pi = DBL2NUM(sqrt(2 * M_PI));
+        VALUE t = DBLS2COMP(z_real + g + 0.5, z_imag);
+        return f_mul(sqrt_2_pi,
+               f_mul(f_pow(t, DBLS2COMP(z_real+0.5, z_imag)),
+               f_mul(ccmath_exp(obj, t), x)));
+
+    }
+}
+
+static VALUE
 ccmath_define_set(VALUE obj, VALUE str)
 {
     rb_ivar_set(obj, id_set, str);
@@ -456,6 +507,7 @@ ccmath_define_set(VALUE obj, VALUE str)
 void Init_ccmath(void)
 {
     id_real_p = rb_intern("real?");
+    id_power = rb_intern("**");
     id_set = rb_intern("set");
     rb_mCCMath = rb_define_module("CCMath");
 
@@ -489,6 +541,7 @@ void Init_ccmath(void)
     rb_define_module_function(rb_mCCMath, "acos", ccmath_acos, 1);
     rb_define_module_function(rb_mCCMath, "atanh", ccmath_atanh, 1);
     rb_define_module_function(rb_mCCMath, "atan", ccmath_atan, 1);
+    rb_define_module_function(rb_mCCMath, "gamma", ccmath_gamma, 1);
     rb_define_module_function(rb_mCCMath, "set=", ccmath_define_set, 1);
 
     rb_ivar_set(rb_mCCMath, id_set, rb_str_new2("R"));
