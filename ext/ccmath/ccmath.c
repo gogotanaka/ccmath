@@ -462,37 +462,40 @@ ccmath_atan(VALUE obj, VALUE z)
 static VALUE
 ccmath_gamma(VALUE obj, VALUE z)
 {
-    static const double lanczos_coef[] = {
-        0.99999999999980993,
-        676.5203681218851,
-        -1259.1392167224028,
-        771.32342877765313,
-        -176.61502916214059,
-        12.507343278686905,
-        -0.13857109526572012,
-        9.9843695780195716e-6,
-        1.5056327351493116e-7
-    };
     EXTRACT_DBLS(z);
     if (z_real < 0.5) {
-        // return pi / (sin(pi*z)*gamma(1-z))
-        return 0;
+        VALUE s1 = ccmath_gamma(obj, f_sub(DBL2NUM(1), z));
+        VALUE s2 = ccmath_sin(obj, f_mul(DBL2NUM(M_PI), z));
+        return f_div(DBL2NUM(M_PI), f_mul(s1, s2));
     }
     else {
+        static const double lanczos_coef[] = {
+            0.99999999999980993,
+            676.5203681218851,
+            -1259.1392167224028,
+            771.32342877765313,
+            -176.61502916214059,
+            12.507343278686905,
+            -0.13857109526572012,
+            9.9843695780195716e-6,
+            1.5056327351493116e-7
+        };
         double g = 7.0;
         z_real -= 1;
-        VALUE x = DBL2NUM(lanczos_coef[0]);
-        double s1, s2;
+        double s, x_real, x_imag;
+        x_real = lanczos_coef[0];
+        x_imag = 0.0;
         for(int i=1; i<g+2; i++) {
-            s1 = (z_real+i) * (z_real+i) + (z_imag * z_imag);
-            s2 = lanczos_coef[i] / s1;
-            x = f_add(x, DBLS2COMP(s2 * z_real, - s2 * z_imag));
+            s = lanczos_coef[i] / ((z_real+i) * (z_real+i) + (z_imag * z_imag));
+            x_real += s * (z_real+i);
+            x_imag -= s * z_imag;
         }
+        VALUE x = DBLS2COMP(x_real, x_imag);
         VALUE sqrt_2_pi = DBL2NUM(sqrt(2 * M_PI));
         VALUE t = DBLS2COMP(z_real + g + 0.5, z_imag);
         return f_mul(sqrt_2_pi,
                f_mul(f_pow(t, DBLS2COMP(z_real+0.5, z_imag)),
-               f_mul(ccmath_exp(obj, t), x)));
+               f_mul(f_div(DBL2NUM(1), ccmath_exp(obj,t)), x)));
 
     }
 }

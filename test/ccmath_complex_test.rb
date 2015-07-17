@@ -65,6 +65,13 @@ class CcmathComplexTest < Minitest::Test
     # assert_in_delta (1.3389725222944935+0.4023594781085251i),  CCMath.atan2(1+2i,1)
   end
 
+  def test_gamma
+    sqrt_pi = CCMath.sqrt(CCMath::PI)
+    assert_in_delta (24), CCMath.gamma(5)
+    assert_in_delta (-2 * sqrt_pi), CCMath.gamma(-0.5)
+    # assert_in_delta (1.3389725222944935+0.4023594781085251i),  CCMath.atan2(1+2i,1)
+  end
+
   def test_error_handling
     # assert_raises(TypeError, "Numeric Number required") { CCMath.acos("2") }
     # assert_raises(TypeError, "Numeric Number required") { CCMath.log("2") }
