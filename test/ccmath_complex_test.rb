@@ -1,10 +1,9 @@
 require 'test_helper'
 
 class CcmathComplexTest < Minitest::Test
-
-  def setup
-    CCMath.set = 'C'
-  end
+  # def setup
+  #   CCMath.set = 'C'
+  # end
 
   def test_sqrt
     assert_equal CCMath.sqrt(1i), CCMath.sqrt(1.0i), '[ruby-core:31672]'

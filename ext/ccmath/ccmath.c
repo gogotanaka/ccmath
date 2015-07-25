@@ -81,13 +81,13 @@ DBLS2COMP(double real, double imag)
 
 #define EXTRACT_DBLS(z);              \
     double z##_real, z##_imag;        \
-    do{                               \
+    do {                              \
         if (f_real_p(z)) {            \
             EXTRACT_DBLS_FROM_REAL(z) \
         } else {                      \
             EXTRACT_DBLS_FROM_COMP(z) \
         }                             \
-    }while(0)
+    } while(0)
 
 #define domain_error(msg) \
     rb_raise(rb_eMathDomainError, "Numerical argument is out of domain - " #msg)
@@ -464,8 +464,9 @@ ccmath_gamma(VALUE obj, VALUE z)
 {
     EXTRACT_DBLS(z);
     if (z_real < 0.5) {
-        VALUE s1 = ccmath_gamma(obj, f_sub(DBL2NUM(1), z));
-        VALUE s2 = ccmath_sin(obj, f_mul(DBL2NUM(M_PI), z));
+        VALUE s1, s2;
+        s1 = ccmath_gamma(obj, f_sub(DBL2NUM(1), z));
+        s2 = ccmath_sin(obj, f_mul(DBL2NUM(M_PI), z));
         return f_div(DBL2NUM(M_PI), f_mul(s1, s2));
     }
     else {
@@ -480,12 +481,14 @@ ccmath_gamma(VALUE obj, VALUE z)
             9.9843695780195716e-6,
             1.5056327351493116e-7
         };
-        double g = 7.0;
+        int i;
+        double g, s, x_real, x_imag;
+
+        g = 7.0;
         z_real -= 1;
-        double s, x_real, x_imag;
         x_real = lanczos_coef[0];
         x_imag = 0.0;
-        for(int i=1; i<g+2; i++) {
+        for(i=1; i<g+2; i++) {
             s = lanczos_coef[i] / ((z_real+i) * (z_real+i) + (z_imag * z_imag));
             x_real += s * (z_real+i);
             x_imag -= s * z_imag;
@@ -500,12 +503,12 @@ ccmath_gamma(VALUE obj, VALUE z)
     }
 }
 
-static VALUE
-ccmath_define_set(VALUE obj, VALUE str)
-{
-    rb_ivar_set(obj, id_set, str);
-    return obj;
-}
+// static VALUE
+// ccmath_define_set(VALUE obj, VALUE str)
+// {
+//     rb_ivar_set(obj, id_set, str);
+//     return obj;
+// }
 
 void Init_ccmath(void)
 {
@@ -545,7 +548,7 @@ void Init_ccmath(void)
     rb_define_module_function(rb_mCCMath, "atanh", ccmath_atanh, 1);
     rb_define_module_function(rb_mCCMath, "atan", ccmath_atan, 1);
     rb_define_module_function(rb_mCCMath, "gamma", ccmath_gamma, 1);
-    rb_define_module_function(rb_mCCMath, "set=", ccmath_define_set, 1);
+    // rb_define_module_function(rb_mCCMath, "set=", ccmath_define_set, 1);
 
-    rb_ivar_set(rb_mCCMath, id_set, rb_str_new2("R"));
+    // rb_ivar_set(rb_mCCMath, id_set, rb_str_new2("R"));
 }
