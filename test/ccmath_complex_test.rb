@@ -69,6 +69,18 @@ class CcmathComplexTest < Minitest::Test
     sqrt_pi = CCMath.sqrt(CCMath::PI)
     assert_in_delta (24), CCMath.gamma(5)
     assert_in_delta (-2 * sqrt_pi), CCMath.gamma(-0.5)
+    assert_in_delta(4 * sqrt_pi / 3, CCMath.gamma(-1.5))
+    assert_in_delta(-2 * sqrt_pi, CCMath.gamma(-0.5))
+    assert_in_delta(sqrt_pi, CCMath.gamma(0.5))
+    assert_in_delta(1, CCMath.gamma(1))
+    assert_in_delta(sqrt_pi / 2, CCMath.gamma(1.5))
+    assert_in_delta(1, CCMath.gamma(2))
+    assert_in_delta(3 * sqrt_pi / 4, CCMath.gamma(2.5))
+    assert_in_delta(2, CCMath.gamma(3))
+    assert_in_delta(15 * sqrt_pi / 8, CCMath.gamma(3.5))
+    assert_in_delta(6, CCMath.gamma(4))
+    # assert_in_delta(1.1240007277776077e+21, CCMath.gamma(23))
+    # assert_in_delta(2.5852016738885062e+22, CCMath.gamma(24))
     # assert_in_delta (1.3389725222944935+0.4023594781085251i),  CCMath.atan2(1+2i,1)
   end
 

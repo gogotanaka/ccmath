@@ -238,19 +238,7 @@
 #   end
 #
 #   def test_gamma
-#     # sqrt_pi = CCMath.sqrt(CCMath::PI)
-#     # check(4 * sqrt_pi / 3, CCMath.gamma(-1.5))
-#     # check(-2 * sqrt_pi, CCMath.gamma(-0.5))
-#     # check(sqrt_pi, CCMath.gamma(0.5))
-#     # check(1, CCMath.gamma(1))
-#     # check(sqrt_pi / 2, CCMath.gamma(1.5))
-#     # check(1, CCMath.gamma(2))
-#     # check(3 * sqrt_pi / 4, CCMath.gamma(2.5))
-#     # check(2, CCMath.gamma(3))
-#     # check(15 * sqrt_pi / 8, CCMath.gamma(3.5))
-#     # check(6, CCMath.gamma(4))
-#     # check(1.1240007277776077e+21, CCMath.gamma(23))
-#     # check(2.5852016738885062e+22, CCMath.gamma(24))
+
 #     #
 #     # # no SEGV [ruby-core:25257]
 #     # 31.upto(65) do |i|
