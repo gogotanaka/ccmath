@@ -7,14 +7,10 @@ module CCMath
   end
 
   def atan2(y,x)
-    begin
-      if y.real? and x.real?
-        atan2!(y,x)
-      else
-        (-1.0).i * log((x + 1.0.i * y) / sqrt(x * x + y * y))
-      end
-    rescue NoMethodError
-      handle_no_method_error
+    if y.real? and x.real?
+      atan2!(y,x)
+    else
+      (-1.0).i * log((x + 1.0.i * y) / sqrt(x * x + y * y))
     end
   end
 

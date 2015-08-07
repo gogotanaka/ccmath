@@ -1,32 +1,11 @@
-# CMath implemented with C
+# Hopefully, CCMath is better than CMath... (・ω・;)
 
 [![Build Status](https://travis-ci.org/gogotanaka/ccmath.svg?branch=master)](https://travis-ci.org/gogotanaka/ccmath)
 
-Ruby has two official libraries related with mathematics.
-
-* **Math** ...Implemented with C. Only for Real number.
-* **CMath**...Implemented with Ruby. Accept Complex number.
-
-And now,
-
-* **CCMath**...Implemented with C. Accept Complex number.
-
-You can declare codomain.
-
-```ruby
-CCMath.set = 'R' # equivalent to Math
-CCMath.set = 'C' # equivalent to CMath
-```
+CCMath is CMath implemented with C-lang.
 
 ## Demo
 ```ruby
-CCMath.cos(1)
-# => 0.5403023058681398
-
-CCMath.cos(1i)
-# CCMath::DomainError: Real Number required
-
-CCMath.set = 'C'
 CCMath.cos(1i)
 #=> (1.5430806348152437+0.0i)
 
