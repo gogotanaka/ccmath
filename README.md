@@ -1,4 +1,4 @@
-# Hopefully, CCMath is better than CMath... (・ω・;)
+## Hopefully, CCMath is better than CMath...! (・ω・;)
 
 [![Build Status](https://travis-ci.org/gogotanaka/ccmath.svg?branch=master)](https://travis-ci.org/gogotanaka/ccmath)
 
@@ -17,17 +17,24 @@ CCMath.cos(1)
 
 ```
 Calculating -------------------------------------
-               CMath    31.262k i/100ms
-              CCMath    53.484k i/100ms
+               CMath    28.423k i/100ms
+              CCMath    61.123k i/100ms
 -------------------------------------------------
-               CMath    437.150k (± 7.1%) i/s -      2.188M
-              CCMath      1.044M (±28.3%) i/s -      4.600M
+               CMath    379.852k (± 4.2%) i/s -      1.904M
+              CCMath      1.163M (± 4.0%) i/s -      5.807M
 
 Comparison:
-              CCMath:  1044410.2 i/s
-               CMath:   437150.3 i/s - 2.39x slower
+              CCMath:  1163020.7 i/s
+               CMath:   379852.3 i/s - 3.06x slower
 
 ```
+
+## What's the difference between CCMath and CMath..?(・ω・;)
+1. CCMath return Complex object even if image part is equivalent 0.
+2. Faster(about 3 times)
+3. Better error handling
+
+Other behaviours suppose to be same.
 
 ## Installation
 
