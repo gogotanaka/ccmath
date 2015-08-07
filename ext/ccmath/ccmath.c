@@ -92,64 +92,32 @@ DBLS2COMP(double real, double imag)
 #define domain_error(msg) \
     rb_raise(rb_eMathDomainError, "Numerical argument is out of domain - " #msg)
 
-// static inline int
-// ensure_domain_and_codomain(VALUE z) {
-//     if (!rb_respond_to(z, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
-//
-//     char codomain = *(RSTRING_PTR(rb_ivar_get(rb_mCCMath, id_set)));
-//     if (codomain == 'R') {
-//         if (!f_real_p(z)) rb_raise(rb_eMathDomainError, "Real Number required");
-//         return 1;
-//     }
-//     else if (codomain == 'C') {
-//         return 0;
-//     }
-//     else {
-//         domain_error("wow");
-//     }
-// }
-
-# define ensure_domain_and_codomain(z) 0
-
 static VALUE
 ccmath_sqrt(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d = NUM2DBL_F(z);
-        if (d < 0.0) domain_error("sqrt");
-        if (d == 0.0) return DBL2NUM(0.0);
-        return DBL2NUM(sqrt(d));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_imag == 0.0) {
-            if (z_real < 0.0) {
-                return DBLS2COMP(0.0, sqrt(fabs(z_real)));
-            }
-            else {
-                return DBLS2COMP(sqrt(z_real), 0.0);
-            }
+    EXTRACT_DBLS(z);
+    if (z_imag == 0.0) {
+        if (z_real < 0.0) {
+            return DBLS2COMP(0.0, sqrt(fabs(z_real)));
         }
         else {
-            double s = sqrt((hypot(z_real, z_imag) + z_real) / 2.0);
-            return DBLS2COMP(s, z_imag / (2 * s));
+            return DBLS2COMP(sqrt(z_real), 0.0);
         }
+    }
+    else {
+        double s = sqrt((hypot(z_real, z_imag) + z_real) / 2.0);
+        return DBLS2COMP(s, z_imag / (2 * s));
     }
 }
 
 static VALUE
 ccmath_exp(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(exp(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_imag == 0.0) return DBLS2COMP(exp(z_real), 0.0);
+    EXTRACT_DBLS(z);
+    if (z_imag == 0.0) return DBLS2COMP(exp(z_real), 0.0);
 
-        double ere = exp(z_real);
-        return DBLS2COMP(ere * cos(z_imag), ere * sin(z_imag));
-    }
+    double ere = exp(z_real);
+    return DBLS2COMP(ere * cos(z_imag), ere * sin(z_imag));
 }
 
 void
@@ -185,278 +153,171 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
     VALUE z, base;
     rb_scan_args(argc, argv, "11", &z, &base);
 
-    if (ensure_domain_and_codomain(z)) {
-        double d = internal_log(z);
-        if (argc == 2) {
-            d /= internal_log(base);
-        }
-        return DBL2NUM(d);
-    }
-    else {
-        EXTRACT_DBLS(z);
-        float r = hypot(z_real, z_imag);
-        if (argc == 2) {
-            if (!rb_respond_to(base, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
-            EXTRACT_DBLS(base);
-            if (base_imag != 0.0) domain_error("log");
-            if (base_real > 0.0) {
-                double ln_base = log(base_real);
-                return DBLS2COMP(log(r) / ln_base, m_atan2(z_imag, z_real) / ln_base);
-            }
-            else {
-                VALUE ln_base = DBLS2COMP(log(fabs(base_real)), M_PI);
-                return f_div(DBLS2COMP(log(r), m_atan2(z_imag, z_real)), ln_base);
-            }
+    EXTRACT_DBLS(z);
+    float r = hypot(z_real, z_imag);
+    if (argc == 2) {
+        if (!rb_respond_to(base, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
+        EXTRACT_DBLS(base);
+        if (base_imag != 0.0) domain_error("log");
+        if (base_real > 0.0) {
+            double ln_base = log(base_real);
+            return DBLS2COMP(log(r) / ln_base, m_atan2(z_imag, z_real) / ln_base);
         }
         else {
-            return DBLS2COMP(log(r), m_atan2(z_imag, z_real));
+            VALUE ln_base = DBLS2COMP(log(fabs(base_real)), M_PI);
+            return f_div(DBLS2COMP(log(r), m_atan2(z_imag, z_real)), ln_base);
         }
+    }
+    else {
+        return DBLS2COMP(log(r), m_atan2(z_imag, z_real));
     }
 }
 
 static VALUE
 ccmath_log2(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d;
-        size_t numbits;
-
-        assing_numbits(z, &d, &numbits);
-
-        if (d < 0.0) domain_error("log2");
-        if (d == 0.0) return DBL2NUM(-INFINITY);
-
-        return DBL2NUM(log2(d) + numbits);
-    }
-    else {
-        EXTRACT_DBLS(z);
-        float r = hypot(z_real, z_imag);
-        return DBLS2COMP(log(r) / M_LN2, m_atan2(z_imag, z_real) / M_LN2);
-    }
+    EXTRACT_DBLS(z);
+    float r = hypot(z_real, z_imag);
+    return DBLS2COMP(log(r) / M_LN2, m_atan2(z_imag, z_real) / M_LN2);
 }
 
 static VALUE
 ccmath_log10(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d;
-        size_t numbits;
-
-        assing_numbits(z, &d, &numbits);
-
-        if (d < 0.0) domain_error("log10");
-        if (d == 0.0) return DBL2NUM(-INFINITY);
-
-        return DBL2NUM(log10(d) + numbits * log10(2));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        float r = hypot(z_real, z_imag);
-        return DBLS2COMP(log(r) / M_LN10, m_atan2(z_imag, z_real) / M_LN10);
-    }
+    EXTRACT_DBLS(z);
+    float r = hypot(z_real, z_imag);
+    return DBLS2COMP(log(r) / M_LN10, m_atan2(z_imag, z_real) / M_LN10);
 }
 
 static VALUE
 ccmath_cos(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(cos(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_real == 0.0) return DBLS2COMP(cosh(z_imag), 0.0);
-        if (z_imag == 0.0) return DBLS2COMP(cos(z_real), 0.0);
-        return DBLS2COMP(cos(z_real) * cosh(z_imag), -sin(z_real) * sinh(z_imag));
-    }
+    EXTRACT_DBLS(z);
+    if (z_real == 0.0) return DBLS2COMP(cosh(z_imag), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(cos(z_real), 0.0);
+    return DBLS2COMP(cos(z_real) * cosh(z_imag), -sin(z_real) * sinh(z_imag));
 }
 
 static VALUE
 ccmath_sin(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(sin(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_real == 0.0) return DBLS2COMP(0.0, sinh(z_imag));
-        if (z_imag == 0.0) return DBLS2COMP(sin(z_real), 0.0);
-        return DBLS2COMP(sin(z_real) * cosh(z_imag), cos(z_real) * sinh(z_imag));
-    }
-
+    EXTRACT_DBLS(z);
+    if (z_real == 0.0) return DBLS2COMP(0.0, sinh(z_imag));
+    if (z_imag == 0.0) return DBLS2COMP(sin(z_real), 0.0);
+    return DBLS2COMP(sin(z_real) * cosh(z_imag), cos(z_real) * sinh(z_imag));
 }
 
 static VALUE
 ccmath_tan(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(tan(NUM2DBL_F(z)));
-    }
-    else {
-        return f_div(ccmath_sin(obj, z), ccmath_cos(obj, z));
-    }
+    return f_div(ccmath_sin(obj, z), ccmath_cos(obj, z));
 }
 
 static VALUE
 ccmath_cosh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(cosh(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_real == 0.0) return DBLS2COMP(cos(z_imag), 0.0);
-        if (z_imag == 0.0) return DBLS2COMP(cosh(z_real), 0.0);
-        return DBLS2COMP(cosh(z_real) * cos(z_imag), sinh(z_real) * sin(z_imag));
-    }
+    EXTRACT_DBLS(z);
+    if (z_real == 0.0) return DBLS2COMP(cos(z_imag), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(cosh(z_real), 0.0);
+    return DBLS2COMP(cosh(z_real) * cos(z_imag), sinh(z_real) * sin(z_imag));
 }
 
 static VALUE
 ccmath_sinh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(sinh(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
-        if (z_real == 0.0) return DBLS2COMP(0.0, sin(z_imag));
-        if (z_imag == 0.0) return DBLS2COMP(sinh(z_real), 0.0);
-        return DBLS2COMP(sinh(z_real) * cos(z_imag), cosh(z_real) * sin(z_imag));
-    }
+    EXTRACT_DBLS(z);
+    if (z_real == 0.0) return DBLS2COMP(0.0, sin(z_imag));
+    if (z_imag == 0.0) return DBLS2COMP(sinh(z_real), 0.0);
+    return DBLS2COMP(sinh(z_real) * cos(z_imag), cosh(z_real) * sin(z_imag));
 }
 
 static VALUE
 ccmath_tanh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(tanh(NUM2DBL_F(z)));
-    }
-    else {
-        return f_div(ccmath_sinh(obj, z), ccmath_cosh(obj, z));
-    }
+    return f_div(ccmath_sinh(obj, z), ccmath_cosh(obj, z));
 }
 
 static VALUE
 ccmath_asinh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(asinh(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    EXTRACT_DBLS(z);
 
-        if (z_imag == 0.0) return DBLS2COMP(asinh(z_real), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(asinh(z_real), 0.0);
 
-        VALUE s1 = DBLS2COMP(1.0 + z_imag, -z_real);
-        VALUE s2 = DBLS2COMP(1.0 - z_imag, z_real);
+    VALUE s1 = DBLS2COMP(1.0 + z_imag, -z_real);
+    VALUE s2 = DBLS2COMP(1.0 - z_imag, z_real);
 
-        s1 = ccmath_sqrt(obj, s1);
-        s2 = ccmath_sqrt(obj, s2);
-        EXTRACT_DBLS(s1);
-        EXTRACT_DBLS(s2);
+    s1 = ccmath_sqrt(obj, s1);
+    s2 = ccmath_sqrt(obj, s2);
+    EXTRACT_DBLS(s1);
+    EXTRACT_DBLS(s2);
 
-        return DBLS2COMP(asinh(s1_real * s2_imag - s2_real * s1_imag), atan2(z_imag, s1_real * s2_real - s1_imag * s2_imag));
-    }
+    return DBLS2COMP(asinh(s1_real * s2_imag - s2_real * s1_imag), atan2(z_imag, s1_real * s2_real - s1_imag * s2_imag));
 }
 
 static VALUE
 ccmath_asin(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d = NUM2DBL_F(z);
-        if (d < -1.0 || 1.0 < d) domain_error("asin");
-        return DBL2NUM(asin(d));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    EXTRACT_DBLS(z);
 
-        if (z_imag == 0.0) return DBLS2COMP(asin(z_real), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(asin(z_real), 0.0);
 
-        VALUE s = ccmath_asinh(obj, DBLS2COMP(-z_imag, z_real));
-        EXTRACT_DBLS(s);
-        return DBLS2COMP(s_imag, -s_real);
-    }
+    VALUE s = ccmath_asinh(obj, DBLS2COMP(-z_imag, z_real));
+    EXTRACT_DBLS(s);
+    return DBLS2COMP(s_imag, -s_real);
 }
 
 static VALUE
 ccmath_acosh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d = NUM2DBL_F(z);
-        if (d < 1.0) domain_error("acosh");
-        return DBL2NUM(acosh(d));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    EXTRACT_DBLS(z);
 
-        if (z_imag == 0.0) return DBLS2COMP(acosh(z_real), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(acosh(z_real), 0.0);
 
-        VALUE s1 = DBLS2COMP(z_real - 1.0, z_imag);
-        VALUE s2 = DBLS2COMP(z_real + 1.0, z_imag);
+    VALUE s1 = DBLS2COMP(z_real - 1.0, z_imag);
+    VALUE s2 = DBLS2COMP(z_real + 1.0, z_imag);
 
-        s1 = ccmath_sqrt(obj, s1);
-        s2 = ccmath_sqrt(obj, s2);
-        EXTRACT_DBLS(s1);
-        EXTRACT_DBLS(s2);
+    s1 = ccmath_sqrt(obj, s1);
+    s2 = ccmath_sqrt(obj, s2);
+    EXTRACT_DBLS(s1);
+    EXTRACT_DBLS(s2);
 
-        return DBLS2COMP(asinh(s1_real * s2_real + s1_imag * s2_imag), 2.0 * atan2(s1_imag, s2_real));
-    }
+    return DBLS2COMP(asinh(s1_real * s2_real + s1_imag * s2_imag), 2.0 * atan2(s1_imag, s2_real));
 }
 
 static VALUE
 ccmath_acos(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d = NUM2DBL_F(z);
-        if (d < -1.0 || 1.0 < d) domain_error("acos");
-        return DBL2NUM(acos(d));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    EXTRACT_DBLS(z);
 
-        if (z_imag == 0.0) return DBLS2COMP(acos(z_real), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(acos(z_real), 0.0);
 
-        return f_sub(DBL2NUM(M_PI / 2.0), ccmath_asin(obj, z));
-    }
+    return f_sub(DBL2NUM(M_PI / 2.0), ccmath_asin(obj, z));
 }
 
 static VALUE
 ccmath_atanh(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        double d = NUM2DBL_F(z);
+    EXTRACT_DBLS(z);
 
-        if (d <  -1.0 || +1.0 <  d) domain_error("atanh");
-        if (d == -1.0) return DBL2NUM(-INFINITY);
-        if (d == +1.0) return DBL2NUM(+INFINITY);
-        return DBL2NUM(atanh(d));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    if (z_imag == 0.0) return DBLS2COMP(atanh(z_real), 0.0);
 
-        if (z_imag == 0.0) return DBLS2COMP(atanh(z_real), 0.0);
+    double sq_imag = z_imag * z_imag;
 
-        double sq_imag = z_imag * z_imag;
-
-        return DBLS2COMP(m_log1p(4.0 * z_real / ((1.0 - z_real) * (1.0 - z_real) + sq_imag)) / 4.0,
-                        -m_atan2(-2.0 * z_imag, (1.0 - z_real) * (1.0 + z_real) - sq_imag) / 2.0);
-    }
+    return DBLS2COMP(m_log1p(4.0 * z_real / ((1.0 - z_real) * (1.0 - z_real) + sq_imag)) / 4.0,
+                    -m_atan2(-2.0 * z_imag, (1.0 - z_real) * (1.0 + z_real) - sq_imag) / 2.0);
 }
 
 static VALUE
 ccmath_atan(VALUE obj, VALUE z)
 {
-    if (ensure_domain_and_codomain(z)) {
-        return DBL2NUM(atan(NUM2DBL_F(z)));
-    }
-    else {
-        EXTRACT_DBLS(z);
+    EXTRACT_DBLS(z);
 
-        if (z_imag == 0.0) return DBLS2COMP(atan(z_real), 0.0);
+    if (z_imag == 0.0) return DBLS2COMP(atan(z_real), 0.0);
 
-        VALUE s = ccmath_atanh(obj, DBLS2COMP(-z_imag, z_real));
-        EXTRACT_DBLS(s);
-        return DBLS2COMP(s_imag, -s_real);
-    }
+    VALUE s = ccmath_atanh(obj, DBLS2COMP(-z_imag, z_real));
+    EXTRACT_DBLS(s);
+    return DBLS2COMP(s_imag, -s_real);
 }
 
 static VALUE
