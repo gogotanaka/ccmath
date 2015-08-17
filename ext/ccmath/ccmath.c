@@ -57,7 +57,7 @@ real_p(VALUE x)
           case T_COMPLEX:  return 0;
         }
     }
-    return 0;
+    rb_raise(rb_eTypeError, "Numeric Number required");
 }
 
 #define binop(n,op) \
