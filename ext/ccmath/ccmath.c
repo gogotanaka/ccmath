@@ -38,10 +38,26 @@ num2dbl_without_to_f(VALUE num)
 
 #define NUM2DBL_F(x) num2dbl_without_to_f(x)
 
-inline static VALUE
-f_real_p(VALUE x)
+inline static int
+real_p(VALUE x)
 {
-    return rb_funcall(x, id_real_p, 0);
+    if (SPECIAL_CONST_P(x)){
+        if (FIXNUM_P(x)) {
+            return 1;
+        }
+        else if (FLONUM_P(x)) {
+            return 1;
+        }
+    }
+    else {
+        switch (BUILTIN_TYPE(x)) {
+          case T_FLOAT:    return 1;
+          case T_BIGNUM:   return 1;
+          case T_RATIONAL: return 1;
+          case T_COMPLEX:  return 0;
+        }
+    }
+    return 0;
 }
 
 #define binop(n,op) \
@@ -60,8 +76,7 @@ binop(pow, id_power)
 inline static VALUE
 DBLS2COMP(double real, double imag)
 {
-    NEWOBJ_OF(obj, struct RComplex, rb_cComplex,
-        T_COMPLEX | (RGENGC_WB_PROTECTED_COMPLEX ? FL_WB_PROTECTED : 0));
+    NEWOBJ_OF(obj, struct RComplex, rb_cComplex, T_COMPLEX | FL_WB_PROTECTED);
 
     RCOMPLEX_SET_REAL(obj, DBL2NUM(real));
     RCOMPLEX_SET_IMAG(obj, DBL2NUM(imag));
@@ -82,7 +97,7 @@ DBLS2COMP(double real, double imag)
 #define EXTRACT_DBLS(z);              \
     double z##_real, z##_imag;        \
     do {                              \
-        if (f_real_p(z)) {            \
+        if (real_p(z)) {              \
             EXTRACT_DBLS_FROM_REAL(z) \
         } else {                      \
             EXTRACT_DBLS_FROM_COMP(z) \
@@ -409,7 +424,4 @@ void Init_ccmath(void)
     rb_define_module_function(rb_mCCMath, "atanh", ccmath_atanh, 1);
     rb_define_module_function(rb_mCCMath, "atan", ccmath_atan, 1);
     rb_define_module_function(rb_mCCMath, "gamma", ccmath_gamma, 1);
-    // rb_define_module_function(rb_mCCMath, "set=", ccmath_define_set, 1);
-
-    // rb_ivar_set(rb_mCCMath, id_set, rb_str_new2("R"));
 }
