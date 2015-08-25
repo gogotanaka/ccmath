@@ -3,7 +3,7 @@
 VALUE rb_mCCMath;
 VALUE rb_eMathDomainError;
 
-static ID id_real_p, id_set, id_power;
+static ID id_power;
 
 #define RB_BIGNUM_TYPE_P(x) RB_TYPE_P((x), T_BIGNUM)
 #define BIGNUM_POSITIVE_P(b) (FIX2LONG(rb_big_cmp((b), INT2FIX(0))) >= 0)
@@ -42,10 +42,7 @@ inline static int
 real_p(VALUE x)
 {
     if (SPECIAL_CONST_P(x)){
-        if (FIXNUM_P(x)) {
-            return 1;
-        }
-        else if (FLONUM_P(x)) {
+        if (FIXNUM_P(x) || FLONUM_P(x)) {
             return 1;
         }
     }
@@ -171,7 +168,7 @@ ccmath_log(int argc, const VALUE* argv, VALUE obj)
     EXTRACT_DBLS(z);
     float r = hypot(z_real, z_imag);
     if (argc == 2) {
-        if (!rb_respond_to(base, id_real_p)) rb_raise(rb_eTypeError, "Numeric Number required");
+        real_p(base);
         EXTRACT_DBLS(base);
         if (base_imag != 0.0) domain_error("log");
         if (base_real > 0.0) {
@@ -379,18 +376,9 @@ ccmath_gamma(VALUE obj, VALUE z)
     }
 }
 
-// static VALUE
-// ccmath_define_set(VALUE obj, VALUE str)
-// {
-//     rb_ivar_set(obj, id_set, str);
-//     return obj;
-// }
-
 void Init_ccmath(void)
 {
-    id_real_p = rb_intern("real?");
     id_power = rb_intern("**");
-    id_set = rb_intern("set");
     rb_mCCMath = rb_define_module("CCMath");
 
     rb_eMathDomainError = rb_define_class_under(rb_mCCMath, "DomainError", rb_eStandardError);

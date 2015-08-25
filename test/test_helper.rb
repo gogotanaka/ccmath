@@ -9,3 +9,9 @@ class ::Complex
     self * 1i
   end
 end
+
+1.i
+#=> (0+1i)
+
+(1+0i).i
+#=> NoMethodError: undefined method `i' for (1+0i):Complex
