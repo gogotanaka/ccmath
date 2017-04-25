@@ -20,9 +20,7 @@ task :compile_and_test do
   Rake::Task['test'].invoke
 end
 
-
 task default: :compile_and_test
-
 
 #  Benchmark
 #-----------------------------------------------
